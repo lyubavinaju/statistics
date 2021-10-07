@@ -15,7 +15,7 @@ public class IntegrationTest {
                 new SocialNetworkStat(creator.get());
         int[] diagram = stat.getPostsDiagramByHours("#лето", 6, 1633025711);
         for (int count : diagram) {
-            System.out.println(count);
+//            System.out.println(count);
             Assertions.assertTrue(count >= 0);
         }
     }
