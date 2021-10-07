@@ -12,10 +12,6 @@ public abstract class AbstractSocialNetwork implements SocialNetwork {
         this.uriReader = uriReader;
     }
 
-    public abstract URI getUriGetDates(String query, long startTime, long endTime);
-
-    public abstract Deque<Long> extractDatesFromResponse(String response);
-
     @Override
     public Deque<Long> getDates(String query, long startTime, long endTime) {
         URI uri = getUriGetDates(query, startTime, endTime);

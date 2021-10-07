@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 public class SocialNetworkTest {
     @Mock
     private UriReader uriReader;
-    private AbstractSocialNetwork socialNetwork;
+    private SocialNetwork socialNetwork;
 
     @BeforeEach
     void init() {
