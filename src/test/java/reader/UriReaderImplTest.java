@@ -1,14 +1,14 @@
-package http;
+package reader;
 
-import com.xebialabs.restito.server.StubServer;
+import reader.UriReaderImpl;
 import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import withStubServer.WithStubServerTest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.function.Consumer;
 
 import static com.xebialabs.restito.builder.stub.StubHttp.whenHttp;
 import static com.xebialabs.restito.semantics.Action.status;
@@ -16,20 +16,9 @@ import static com.xebialabs.restito.semantics.Action.stringContent;
 import static com.xebialabs.restito.semantics.Condition.method;
 import static com.xebialabs.restito.semantics.Condition.startsWithUri;
 
-public class UriReaderImplTest {
-    private static final int PORT = 32453;
+public class UriReaderImplTest extends WithStubServerTest {
 
-    private void withStubServer(int port, Consumer<StubServer> callback) {
-        StubServer stubServer = null;
-        try {
-            stubServer = new StubServer(port).run();
-            callback.accept(stubServer);
-        } finally {
-            if (stubServer != null) {
-                stubServer.stop();
-            }
-        }
-    }
+    private static final int PORT = 32453;
 
     @Test
     public void getResponseToString() {

@@ -1,19 +1,32 @@
 package socialNetwork.vk;
 
-import http.UriReaderImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reader.PropertiesReader;
+import reader.PropertiesReaderImpl;
+import reader.UriReader;
+import reader.UriReaderImpl;
+import socialNetwork.SocialNetworkPropertiesGetter;
 
 import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class VkTest {
     Vk vk;
 
     @BeforeEach
     void init() {
-        vk = new VkCreator(new UriReaderImpl()).get();
+        PropertiesReader propertiesReader = new PropertiesReaderImpl();
+        UriReader uriReader = new UriReaderImpl();
+        SocialNetworkPropertiesGetter propertiesGetter =
+                new VkPropertiesGetter(propertiesReader);
+        vk = new Vk(uriReader,
+                propertiesGetter.getProperties(),
+                propertiesGetter.getSecretProperties(),
+                propertiesGetter.getApi()
+        );
     }
 
     @Test
@@ -32,34 +45,49 @@ public class VkTest {
 
     @Test
     void testExtractDatesFromResponse() {
-        String response = """
+        long startTime = 100000;
+        long endTime = 200000;
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        long value1 = random.nextLong(startTime, endTime + 1);
+        long value2 = random.nextLong(startTime, endTime + 1);
+        long value3 = random.nextLong(startTime, endTime + 1);
+        long value4 = random.nextLong(startTime, endTime + 1);
+        String responsePattern = """
                 {
                 "response" : {
                   "items" : [
-                  {"date" : 100000},
-                  {"date" : 100001},
-                  {"date" : 100002},
-                  {"date" : 100003}
+                  {"date" : %d},
+                  {"date" : %d},
+                  {"date" : %d},
+                  {"date" : %d}
                   ]
                  }
                 }
                                 """;
+        String response = String.format(responsePattern, value1, value2, value3, value4);
         Deque<Long> dates = vk.extractDatesFromResponse(response);
         Long[] result = dates.toArray(new Long[0]);
         Assertions.assertArrayEquals(result,
-                List.of(100000L, 100001L, 100002L, 100003L).toArray());
+                List.of(value1, value2, value3, value4).toArray());
     }
 
     @Test
     void testTooLongResponse() {
-        String response = """
+        long startTime = 100000;
+        long endTime = 200000;
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        long value1 = random.nextLong(startTime, endTime + 1);
+        long value2 = random.nextLong(startTime, endTime + 1);
+        long value3 = random.nextLong(startTime, endTime + 1);
+        long value4 = random.nextLong(startTime, endTime + 1);
+        String responsePattern = """
                 {
                 "response" : {
                   "items" : [
-                  {"date" : 100000},
-                  {"date" : 100001},
-                  {"date" : 100002},
-                  {"date" : 100003}
+                  {"date" : %d},
+                  {"date" : %d},
+                  {"date" : %d},
+                  {"date" : %d}
                   ],
                   "next_from": "next"
                  }
@@ -68,7 +96,7 @@ public class VkTest {
 
         Assertions.assertThrows(
                 Exception.class,
-                () -> vk.extractDatesFromResponse(response)
+                () -> vk.extractDatesFromResponse(String.format(responsePattern, value1, value2, value3, value4))
         );
 
     }

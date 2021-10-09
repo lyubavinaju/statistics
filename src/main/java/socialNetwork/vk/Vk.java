@@ -1,6 +1,6 @@
 package socialNetwork.vk;
 
-import http.UriReader;
+import reader.UriReader;
 import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -9,37 +9,27 @@ import socialNetwork.AbstractSocialNetwork;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Properties;
+import java.util.*;
 
 
 public class Vk extends AbstractSocialNetwork {
-    private final String API;
-    private final String VERSION;
-    private final String COUNT;
-    private final String ACCESS_TOKEN;
-
-    Vk(Properties properties,
-       Properties secretProperties, UriReader uriReader) {
-        super(uriReader);
-        ACCESS_TOKEN = secretProperties.getProperty("accessToken");
-        API = properties.getProperty("vk.api");
-        VERSION = properties.getProperty("vk.version");
-        COUNT = properties.getProperty("vk.limit");
+    public Vk(UriReader uriReader, Properties properties,
+              Properties secretProperties, String api) {
+        super(uriReader, properties, secretProperties, api);
     }
 
     @Override
     public URI getUriGetDates(String query, long startTime, long endTime) {
         Assertions.assertTrue(startTime >= 0 && endTime >= startTime);
         try {
-            URIBuilder uriBuilder = new URIBuilder(API);
+            URIBuilder uriBuilder = new URIBuilder(api);
+            secretProperties.forEach((key, value) -> uriBuilder.addParameter(key.toString(),
+                    value.toString()));
+            properties.forEach((key, value) -> uriBuilder.addParameter(key.toString(),
+                    value.toString()));
             uriBuilder.addParameter("q", query);
-            uriBuilder.addParameter("access_token", ACCESS_TOKEN);
-            uriBuilder.addParameter("v", VERSION);
             uriBuilder.addParameter("start_time", String.valueOf(startTime));
             uriBuilder.addParameter("end_time", String.valueOf(endTime));
-            uriBuilder.addParameter("count", COUNT);
             return uriBuilder.build();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
@@ -54,7 +44,7 @@ public class Vk extends AbstractSocialNetwork {
         JSONArray items = jsonGetResponse
                 .getJSONArray("items");
         if (jsonGetResponse.has("next_from"))
-            throw new RuntimeException("Too many items in time range. Available maximum is " + COUNT +
+            throw new RuntimeException("Too many items in time range. Available maximum is " + properties.getProperty("count") +
                     "items.");
 
         Deque<Long> result = new ArrayDeque<>();

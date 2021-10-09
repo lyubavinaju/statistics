@@ -13,6 +13,7 @@ import java.util.Deque;
 import static org.mockito.Mockito.when;
 
 public class SocialNetworkStatTest {
+    private static final int HOUR_IN_SECONDS = 3600;
     private SocialNetworkStat stat;
     @Mock
     private SocialNetwork socialNetwork;
@@ -23,46 +24,15 @@ public class SocialNetworkStatTest {
         stat = new SocialNetworkStat(socialNetwork);
     }
 
-
-    @Test
-    void testGetPostsDiagramByHoursThreeHours() {
-        int hours = 3;
-        int hourInSeconds = 3600;
-        String query = "#лето";
-        long timeStampInSeconds = System.currentTimeMillis() / 1000;
-        long endTimeInSeconds = timeStampInSeconds - 1;
-        long startTimeInSeconds =
-                timeStampInSeconds - (long) hours * hourInSeconds;
-        when(socialNetwork
-                .getDates(query,
-                        startTimeInSeconds,
-                        endTimeInSeconds))
-                .thenReturn(createAnswers(startTimeInSeconds, endTimeInSeconds));
-
-        int[] postsDiagramByHours = stat.getPostsDiagramByHours(query, hours, timeStampInSeconds);
-        Assertions.assertArrayEquals(new int[]{2, 0, 2}, postsDiagramByHours);
-    }
-
-    private Deque<Long> createAnswers(long startTimeInSeconds, long endTimeInSeconds) {
-        Deque<Long> deque = new ArrayDeque<>();
-        deque.add(startTimeInSeconds);
-        deque.add(startTimeInSeconds);
-        deque.add(endTimeInSeconds);
-        deque.add(endTimeInSeconds);
-        return deque;
-    }
-
-
     @Test
     void testGetPostsDiagramByHoursOneHour() {
         int hours = 1;
-        int hourInSeconds = 3600;
-
         String query = "#лето";
         long timeStampInSeconds = 163302571;
+
         long endTimeInSeconds = timeStampInSeconds - 1;
         long startTimeInSeconds =
-                timeStampInSeconds - (long) hours * hourInSeconds;
+                timeStampInSeconds - (long) hours * HOUR_IN_SECONDS;
         when(socialNetwork
                 .getDates(query,
                         startTimeInSeconds,
@@ -74,17 +44,38 @@ public class SocialNetworkStatTest {
     }
 
     @Test
-    void testIncorrectApiAnswer() {
-        int hours = 1;
-        int hourInSeconds = 3600;
-
+    void testGetPostsDiagramByHoursThreeHours() {
+        int hours = 3;
         String query = "#лето";
-        long timeStampInSeconds = 163302571;
+        long timeStampInSeconds = System.currentTimeMillis() / 1000;
+
         long endTimeInSeconds = timeStampInSeconds - 1;
         long startTimeInSeconds =
-                timeStampInSeconds - (long) hours * hourInSeconds;
+                timeStampInSeconds - (long) hours * HOUR_IN_SECONDS;
+        when(socialNetwork
+                .getDates(query,
+                        startTimeInSeconds,
+                        endTimeInSeconds))
+                .thenReturn(createAnswers(startTimeInSeconds, endTimeInSeconds));
+
+        int[] postsDiagramByHours = stat.getPostsDiagramByHours(query, hours, timeStampInSeconds);
+        Assertions.assertArrayEquals(new int[]{2, 0, 2}, postsDiagramByHours);
+    }
+
+
+    @Test
+    void testIncorrectContentInApiAnswer() {
+        int hours = 1;
+        String query = "#лето";
+        long timeStampInSeconds = 163302571;
+
+        long endTimeInSeconds = timeStampInSeconds - 1;
+        long startTimeInSeconds =
+                timeStampInSeconds - (long) hours * HOUR_IN_SECONDS;
         Deque<Long> apiAnswer = new ArrayDeque<>();
         apiAnswer.add(100L);
+
+
         when(socialNetwork
                 .getDates(query,
                         startTimeInSeconds,
@@ -95,5 +86,13 @@ public class SocialNetworkStatTest {
 
     }
 
+    private Deque<Long> createAnswers(long startTimeInSeconds, long endTimeInSeconds) {
+        Deque<Long> deque = new ArrayDeque<>();
+        deque.add(startTimeInSeconds);
+        deque.add(startTimeInSeconds);
+        deque.add(endTimeInSeconds);
+        deque.add(endTimeInSeconds);
+        return deque;
+    }
 
 }
